@@ -4,74 +4,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Live Counter</title>
+<title>Twitch Counter</title>
 <style>
 body {
-  background: #101010;
+  background: transparent;
   color: white;
   font-family: Arial, sans-serif;
   text-align: center;
-  padding-top: 50px;
 }
 .counter {
+  color: white;
   font-size: 48px;
   font-weight: bold;
-  margin: 15px;
 }
 </style>
 </head>
 <body>
 
-<h2>YouTube</h2>
-<div class="counter" id="youtube">Загрузка...</div>
-
-<h2>Twitch</h2>
 <div class="counter" id="twitch">Загрузка...</div>
 
 <script>
-async function updateYouTube() {
-  try {
-    const url = "https://pulse.walls.sh/profile?url=" +
-      encodeURIComponent("https://www.youtube.com/@industrioussk65");
-
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("HTTP " + response.status);
-
-    const data = await response.json();
-
-    if (data.followers == null) throw new Error("No data");
-
-    document.getElementById("youtube").textContent =
-      String(data.followers).replace(/,/g, "");
-  } catch (error) {
-    document.getElementById("youtube").textContent = "Ошибка";
-    console.error(error);
-  }
-}
-
 async function updateTwitch() {
   try {
     const response = await fetch(
       "https://decapi.me/twitch/followcount/industrioussk_tw"
     );
-
-    const count = await response.text();
+    const count = (await response.text()).trim();
 
     document.getElementById("twitch").textContent =
-      /^\d+$/.test(count.trim()) ? count.trim() : "Ошибка";
-  } catch (error) {
+      /^\d+$/.test(count) ? count : "Ошибка";
+  } catch {
     document.getElementById("twitch").textContent = "Ошибка";
-    console.error(error);
   }
 }
 
-function update() {
-  updateYouTube();
-  updateTwitch();
-}
-
-update();
-setInterval(update, 60000);
+updateTwitch();
+setInterval(updateTwitch, 60000);
 </script>
 
 </body>
