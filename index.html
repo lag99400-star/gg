@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Subscriber Counter</title>
+<style>
+body {
+  background: #111;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+  padding-top: 60px;
+}
+.counter {
+  font-size: 45px;
+  font-weight: bold;
+  margin: 15px;
+}
+</style>
+</head>
+<body>
+
+<h2>YouTube</h2>
+<div class="counter" id="youtube">...</div>
+
+<h2>Twitch</h2>
+<div class="counter" id="twitch">...</div>
+
+<script>
+const YOUTUBE_API_KEY = "YOUR_YOUTUBE_API_KEY";
+const TWITCH_CLIENT_ID = "YOUR_TWITCH_CLIENT_ID";
+const TWITCH_ACCESS_TOKEN = "YOUR_TWITCH_ACCESS_TOKEN";
+
+async function updateYouTube() {
+  try {
+    const url = `https://www.googleapis.com/youtube/v3/channels?part=statistics&forHandle=industrioussk65&key=${YOUTUBE_API_KEY}`;
+    const r = await fetch(url);
+    const d = await r.json();
+    document.getElementById("youtube").textContent =
+      Number(d.items[0].statistics.subscriberCount).toLocaleString();
+  } catch {
+    document.getElementById("youtube").textContent = "Error";
+  }
+}
+
+async function updateTwitch() {
+  try {
+    const headers = {
+      "Client-Id": TWITCH_CLIENT_ID,
+      "Authorization": "Bearer " + TWITCH_ACCESS_TOKEN
+    };
+
+    const userResponse = await fetch(
+      "https://api.twitch.tv/helix/users?login=industrioussk_tw",
+      { headers }
+    );
+
+    const userData = await userResponse.json();
+    const id = userData.data[0].id;
+
+    const response = await fetch(
+      `https://api.twitch.tv/helix/channels/followers?broadcaster_id=${id}`,
+      { headers }
+    );
+
+    const data = await response.json();
+
+    document.getElementById("twitch").textContent =
+      Number(data.total).toLocaleString();
+  } catch {
+    document.getElementById("twitch").textContent = "Error";
+  }
+}
+
+function update() {
+  updateYouTube();
+  updateTwitch();
+}
+
+update();
+setInterval(update, 60000);
+</script>
+
+</body>
+</html>
